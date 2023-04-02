@@ -535,19 +535,12 @@ function kuvaTeksti() {
 }
 
 
-function mousePressed() {
-
-
-
-	if (!isMouseClicked) {
-		isMouseClicked = true;
-	}
-
-
-	onlypicupdatePage = true;
-
-
-}
+// function mousePressed() {
+//	if (!isMouseClicked) {
+//		isMouseClicked = true;
+//	}
+//	onlypicupdatePage = true;
+// }
 
 function touchStarted() {
 	let fs = fullscreen();
