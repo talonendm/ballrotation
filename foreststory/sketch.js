@@ -138,11 +138,19 @@ function setup() {
 
 
 
+	// ----------------------------------
+	function voiceReady() {
+		// https://www.youtube.com/watch?v=v0CHV33wDsI
+		console.log(speech.voices);
+	}
+	// ----------------------------------
+
+
 	// https://www.youtube.com/watch?v=wf8w1BJb9Xc&embeds_euri=https%3A%2F%2Fwww.google.com%2Fsearch%3Fq%3Dp5%2Bspeech%26oq%3Dp5%2Bspeech%26aqs%3Dchrome.0.69i59l3j0i22i30l3j69i60l2.1591j0j7%26sourceid%3Dchrome%26ie%3DUTF-8&feature=emb_rel_pause
 
 
-	voices = speech.voices;
-	print(voices);
+	//voices = speech.voices;
+	//print(voices);
 	updatePage = true;
 
 
@@ -279,12 +287,7 @@ function endSpeaking() {
 }
 // .................................
 
-// ----------------------------------
-function voiceReady() {
-	// https://www.youtube.com/watch?v=v0CHV33wDsI
-	console.log(speech.voices);
-}
-// ----------------------------------
+
 
 // ----------------------------------
 function keyPressed() {
@@ -325,7 +328,7 @@ function draw() {
 	//rect(0, 0, windowWidth, 60);
 	//fill(100);
 	//textSize(15);
-	
+
 	elapsedTime = millis() - startTime; // Calculate the elapsed time
 
 
@@ -340,7 +343,7 @@ function draw() {
 
 
 	if (updatePage | onlypicupdatePage | animatePage) {
-		
+
 		textSize(24);
 
 		// ----------------------------------
@@ -451,7 +454,7 @@ function draw() {
 }
 
 function timeusageAnalysis() {
-rectMode(CENTER);
+	rectMode(CENTER);
 	push();
 	translate(windowWidth / 2, ypos);
 
