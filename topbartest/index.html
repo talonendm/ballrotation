@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+
+    <title>Gallery with Hovering Text</title>
+    <!-- Include SimpleLightbox CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.7.0/simplelightbox.min.css">
+
+    <!-- Include jQuery (required by SimpleLightbox) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <!-- Include SimpleLightbox JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplelightbox/2.7.0/simple-lightbox.min.js"></script>
+
+
+
+    <style>
+
+
+body {
+            background-color: darkolivegreen;
+            color: black;
+        }
+
+
+
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .gallery-item {
+            flex: 0 0 calc(33.33% - 10px);
+            margin: 5px;
+            margin-bottom: 10px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.3s;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.2);
+        }
+
+        .image-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .gallery-item:hover .image-caption {
+            opacity: 1;
+        }
+        /* Style for the top bar */
+        .top-bar {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            transition: top 0.3s; /* Add a smooth transition for the top property */
+        }
+
+        /* Style for the buttons */
+        .button {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        /* Add some hover effect to the buttons */
+        .button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <button class="button" onclick="openNewPage()">Open New Page</button>
+        <button class="button">Button 2</button>
+        <button class="button">Button 3</button>
+    </div>
+
+    <div style="height: 2000px;"> <!-- Add some content to make the page scrollable -->
+        <!-- Your page content goes here -->
+
+        <p> .</p>
+        <p> .</p>
+        <div class="gallery">
+            <div class="gallery-item">
+                <a href="/ballrotation/photogallery/html/image1.html" data-fancybox="gallery">
+                    <img src="/ballrotation/assets/ai/wool-food/e-pic-0001.jpg" alt="Image 1">
+                    <div class="image-caption">cockroach-humanoid-construction-worker</div>
+                </a>
+            </div>
+    
+            <div class="gallery-item">
+                <a href="/ballrotation/assets/ai/wool-food/e-pic-0002.jpg" data-fancybox="gallery">
+                    <img src="/ballrotation/assets/ai/wool-food/e-pic-0002.jpg" alt="Image 2">
+                    <div class="image-caption">cockroach-roof-inspector-professor</div>
+                </a>
+            </div>
+    
+            <div class="gallery-item">
+                <a href="/ballrotation/assets/ai/wool-food/e-pic-0003.jpg" data-fancybox="gallery">
+                    <img src="/ballrotation/assets/ai/wool-food/e-pic-0003.jpg" alt="Image 3">
+                    <div class="image-caption">cockroach-roof-inspector</div>
+                </a>
+            </div>
+    
+            <div class="gallery-item">
+                <a href="/ballrotation/assets/ai/wool-food/e-pic-0004.jpg" data-fancybox="gallery">
+                    <img src="/ballrotation/assets/ai/wool-food/e-pic-0004.jpg" alt="Image 4">
+                    <div class="image-caption">cockroach-humanoid</div>
+                </a>
+            </div>
+    
+            <div class="gallery-item">
+                <a href="/ballrotation/assets/ai/wool-food/e-pic-0005.jpg" data-fancybox="gallery">
+                    <img src="/ballrotation/assets/ai/wool-food/e-pic-0005.jpg" alt="Image 5">
+                    <div class="image-caption">cockroach-humanoid</div>
+                </a>
+            </div>
+    
+            <!-- generate-->
+            <!-- https://docs.google.com/spreadsheets/d/1Y1Wia9i3ak7fLWj4oErOQ9fJoLlZZiXjLm5048rWP_c/edit?usp=sharing -->
+            <div class="gallery-item">
+                <a href="/ballrotation/assets/ai/wool-food/e-pic-0006.jpg" data-fancybox="gallery">
+                    <img src="/ballrotation/assets/ai/wool-food/e-pic-0006.jpg" alt="Image 6">
+                    <div class="image-caption">cockroach-humanoid</div>
+                </a>
+            </div>
+            <div class="gallery-item">
+                <a href="/ballrotation/assets/ai/wool-food/e-pic-0007.jpg" data-fancybox="gallery">
+                    <img src="/ballrotation/assets/ai/wool-food/e-pic-0007.jpg" alt="Image 6">
+                    <div class="image-caption">cockroach-humanoid</div>
+                </a>
+            </div>
+
+        </div>
+
+        <script>
+            $(document).ready(function () {
+                // Initialize SimpleLightbox
+                $('a[data-fancybox="gallery"]').simpleLightbox();
+            });
+        </script>
+
+
+
+        <!--  -->
+    </div>
+
+    <script>
+        function openNewPage() {
+            // Specify the URL of the page you want to open
+            var newPageUrl = 'https://www.example.com';
+
+            // Use window.open() to open a new browser window or tab
+            window.open(newPageUrl, '_blank');
+        }
+        
+        // JavaScript to hide the top bar when scrolling down
+        window.addEventListener("scroll", function() {
+            var topBar = document.querySelector(".top-bar");
+            if (window.scrollY > 50) { // Adjust this value to control when the bar disappears
+                topBar.style.top = "-100px"; // Hide the top bar
+            } else {
+                topBar.style.top = "0"; // Show the top bar
+            }
+        });
+    </script>
+</body>
+</html>
