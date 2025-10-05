@@ -18,6 +18,13 @@ Yarn Hugs offers hand-knit plush toys designed to bring heartwarming moments int
 
 testing html
 
+# GIT (gh-pages)
+
+git status
+git add .
+git commit -m "change X"
+git push git@github-talonendm:talonendm/ballrotation
+
 ---
 
 [Disclaimer](https://talonendm.github.io/disclaimer)
