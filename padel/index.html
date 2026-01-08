@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="fi">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Padel Americano</title>
+    <style>
+        :root {
+            --bg: #f6f1e7;
+            --ink: #1f1d18;
+            --accent: #d27b3b;
+            --paper: #fffdf7;
+            --grid: #cdbfa7;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Georgia", "Times New Roman", serif;
+            color: var(--ink);
+            background: radial-gradient(circle at top left, #fff7e8 0%, #f1e6d2 40%, #efe0c6 100%);
+            padding: 24px;
+        }
+
+        .wrap {
+            max-width: 980px;
+            margin: 0 auto;
+            background: var(--paper);
+            border: 2px solid var(--ink);
+            box-shadow: 10px 10px 0 #e5d4b4;
+            padding: 24px;
+        }
+
+        h1 {
+            margin: 0 0 8px 0;
+            font-size: 30px;
+            letter-spacing: 0.5px;
+        }
+
+        .sub {
+            margin: 0 0 12px 0;
+            font-size: 14px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .controls label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .controls input {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid var(--ink);
+            background: #fff;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0 12px 0;
+        }
+
+        button {
+            border: 2px solid var(--ink);
+            background: var(--accent);
+            color: #fff;
+            padding: 8px 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button.secondary {
+            background: #fff;
+            color: var(--ink);
+        }
+
+        .table-wrap {
+            border: 2px dashed var(--grid);
+            padding: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--grid);
+            padding: 8px;
+            text-align: center;
+            height: 32px;
+            font-size: 14px;
+        }
+
+        th {
+            background: #f3e7d3;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .notes {
+            margin-top: 12px;
+            font-size: 12px;
+        }
+
+        .print-hint {
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        @media print {
+            body {
+                background: #fff;
+                padding: 0;
+            }
+
+            .wrap {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+            }
+
+            .controls,
+            .actions,
+            .print-hint,
+            h1,
+            .sub,
+            .notes {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <h1>Padel Americano</h1>
+        <p class="sub">Kirjoita pelaajien nimet ja luo Americano-parit sekä tulostettava pistetaulukko.</p>
+        <p class="notes">Americano: jokainen syöttää 4 palloa, yhteensä 16 pistettä per peli (esim. 10-6).</p>
+
+        <div class="controls" id="nameInputs"></div>
+
+        <div class="actions">
+            <button id="buildBtn">Luo parit</button>
+            <button class="secondary" id="clearBtn">Tyhjennä</button>
+            <button class="secondary" id="printBtn">Tulosta</button>
+        </div>
+
+        <div class="controls" id="roundControls">
+            <div>
+                <label for="repeatCount">Kierrosten toistot</label>
+                <input id="repeatCount" type="number" min="1" max="5" value="1" />
+            </div>
+        </div>
+
+        <p class="notes" id="roundCount"></p>
+
+        <div class="table-wrap">
+            <table id="scoreTable">
+                <thead></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <p class="print-hint">Vinkki: Tulostusnäkymä piilottaa lomakkeen automaattisesti.</p>
+    </div>
+
+    <script>
+        const nameInputs = document.getElementById('nameInputs');
+        const scoreTable = document.getElementById('scoreTable');
+        const roundCount = document.getElementById('roundCount');
+        const repeatCountInput = document.getElementById('repeatCount');
+        const buildBtn = document.getElementById('buildBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const printBtn = document.getElementById('printBtn');
+
+        const DEFAULT_PLAYERS = 6;
+        const MIN_PLAYERS = 4;
+        const MAX_PLAYERS = 7;
+
+        function createInputs() {
+            nameInputs.innerHTML = '';
+            for (let i = 1; i <= MAX_PLAYERS; i += 1) {
+                const wrapper = document.createElement('div');
+                const label = document.createElement('label');
+                label.textContent = `Pelaaja ${i}`;
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.placeholder = i <= DEFAULT_PLAYERS ? `Pelaaja ${i}` : 'Valinnainen';
+                if (i <= DEFAULT_PLAYERS) {
+                    input.value = `Pelaaja ${i}`;
+                }
+                wrapper.appendChild(label);
+                wrapper.appendChild(input);
+                nameInputs.appendChild(wrapper);
+            }
+        }
+
+        function buildAmericanoRounds(names) {
+            const n = names.length; // 5 pelaajaa
+            const rounds = [];
+
+            // Luodaan ensin kaikki mahdolliset 2v2-jako 4 pelaajalle
+            function generateCombos(players) {
+                return [
+                    [[players[0], players[1]], [players[2], players[3]]],
+                    [[players[0], players[2]], [players[1], players[3]]],
+                    [[players[0], players[3]], [players[1], players[2]]],
+                ];
+            }
+
+            // 1️⃣ Tehdään 5 erää (yksi taukopelaaja per erä)
+            for (let restIndex = 0; restIndex < n; restIndex++) {
+                const restPlayer = names[restIndex];
+                const players = names.filter((_, i) => i !== restIndex);
+                const combos = generateCombos(players);
+
+                // 2️⃣ Sekoitetaan kombot satunnaisesti
+                for (let i = combos.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [combos[i], combos[j]] = [combos[j], combos[i]];
+                }
+
+                // 3️⃣ Lisätään kombot kierroksiin
+                combos.forEach(pair => {
+                    rounds.push({
+                        teamA: pair[0].join(' + '),
+                        teamB: pair[1].join(' + '),
+                        rest: [restPlayer],
+                    });
+                });
+            }
+
+            // 4️⃣ Nyt voimme järjestää kierrokset **5 erässä** siten,
+            // että jokaisessa erässä jokainen pelaaja on tauolla kerran
+            const organizedRounds = [];
+            const roundsPerRest = 3; // 3 peliä per taukopelaaja
+
+            for (let i = 0; i < roundsPerRest; i++) {
+                for (let restIndex = 0; restIndex < n; restIndex++) {
+                    organizedRounds.push(rounds[i + restIndex * roundsPerRest]);
+                }
+            }
+
+            return organizedRounds;
+        }
+        function buildTable() {
+            const names = Array.from(nameInputs.querySelectorAll('input'))
+                .map(input => input.value.trim())
+                .filter(value => value.length > 0);
+
+            if (names.length < MIN_PLAYERS || names.length > MAX_PLAYERS) {
+                alert('Anna 4–7 pelaajan nimet.');
+                return;
+            }
+
+            const repeatCount = Math.max(1, Math.min(5, Number(repeatCountInput.value) || 1));
+            repeatCountInput.value = repeatCount;
+
+            const thead = scoreTable.querySelector('thead');
+            const tbody = scoreTable.querySelector('tbody');
+            thead.innerHTML = '';
+            tbody.innerHTML = '';
+
+            /* === HEADER === */
+            const headerRow = document.createElement('tr');
+
+            ['Kierros', 'Pari A', 'Pari B'].forEach(text => {
+                const th = document.createElement('th');
+                th.textContent = text;
+                headerRow.appendChild(th);
+            });
+
+            // Pelaajakohtaiset sarakkeet
+            names.forEach(name => {
+                const th = document.createElement('th');
+                th.textContent = name;
+                headerRow.appendChild(th);
+            });
+
+            const thRest = document.createElement('th');
+            thRest.textContent = 'Tauko';
+            headerRow.appendChild(thRest);
+
+            thead.appendChild(headerRow);
+
+            /* === ROUNDS === */
+            const rounds = buildAmericanoRounds(names);
+            const totalRounds = [];
+            for (let i = 0; i < repeatCount; i += 1) {
+                totalRounds.push(...rounds);
+            }
+
+            totalRounds.forEach((round, index) => {
+                const row = document.createElement('tr');
+
+                // Kierros
+                const roundCell = document.createElement('td');
+                roundCell.textContent = index + 1;
+                row.appendChild(roundCell);
+
+                // Parit
+                const teamACell = document.createElement('td');
+                teamACell.textContent = round.teamA;
+                row.appendChild(teamACell);
+
+                const teamBCell = document.createElement('td');
+                teamBCell.textContent = round.teamB;
+                row.appendChild(teamBCell);
+
+                // Pelaajakohtaiset pisteet
+                names.forEach(() => {
+                    const td = document.createElement('td');
+                    td.textContent = ''; // kirjoitetaan käsin
+                    row.appendChild(td);
+                });
+
+                // Tauko
+                const restCell = document.createElement('td');
+                restCell.textContent = round.rest.length ? round.rest.join(', ') : '-';
+                row.appendChild(restCell);
+
+                tbody.appendChild(row);
+            });
+
+            roundCount.textContent = `Luotiin ${totalRounds.length} kierrosta.`;
+        }
+
+
+        function clearForm() {
+            nameInputs.querySelectorAll('input').forEach((input, index) => {
+                input.value = index < DEFAULT_PLAYERS ? `Pelaaja ${index + 1}` : '';
+            });
+            repeatCountInput.value = '1';
+            scoreTable.querySelector('thead').innerHTML = '';
+            scoreTable.querySelector('tbody').innerHTML = '';
+            roundCount.textContent = '';
+        }
+
+        buildBtn.addEventListener('click', buildTable);
+        clearBtn.addEventListener('click', clearForm);
+        printBtn.addEventListener('click', () => window.print());
+
+        createInputs();
+        buildTable();
+    </script>
+</body>
+
+</html>

@@ -18,12 +18,17 @@ Yarn Hugs offers hand-knit plush toys designed to bring heartwarming moments int
 
 testing html
 
+## qr-generator
+
+Generate QR-code. 10/2025
+
 # GIT (gh-pages)
 
 git status
 git add .
 git commit -m "change X"
 git push git@github-talonendm:talonendm/ballrotation
+git push git@github-talonendm:talonendm/talonendm.github.io.git
 
 ---
 
