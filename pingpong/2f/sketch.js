@@ -23,7 +23,7 @@ const MAX_SPEED = 14;
 let gameStartTime = 0;
 let longestGame = 0;
 
-function setup() { 
+function setup() {
   createCanvas(windowWidth, windowHeight);
   colorMode(HSB, 360, 100, 100);
   rectMode(CENTER);
@@ -123,7 +123,7 @@ function drawTime() {
     25
   );
 
- text(
+  text(
     `Pisin bole: ${longest} s`,
     width / 2,
     55
@@ -152,7 +152,15 @@ function moveBall() {
   ballX += ballVX * speedMultiplier;
   ballY += ballVY * speedMultiplier;
 
-  if (ballY - ballSize / 2 < 0 || ballY + ballSize / 2 > height) ballVY *= -1;
+  if (ballY - ballSize / 2 < 0) {
+    ballY = ballSize / 2;
+    ballVY = abs(ballVY);
+  }
+
+  if (ballY + ballSize / 2 > height) {
+    ballY = height - ballSize / 2;
+    ballVY = -abs(ballVY);
+  }
 
   if (
     ballX - ballSize / 2 < leftX + paddleW / 2 &&
@@ -168,13 +176,13 @@ function moveBall() {
     applySpin(rightY, false);
   }
 
-if (ballX < 0) {
-  scorePoint(false);
-}
+  if (ballX < 0) {
+    scorePoint(false);
+  }
 
-if (ballX > width) {
-  scorePoint(true);
-}
+  if (ballX > width) {
+    scorePoint(true);
+  }
 
 }
 
@@ -183,7 +191,7 @@ function applySpin(paddleY, isLeftPlayer) {
   hitPos = constrain(hitPos, -1, 1);
 
   let angle = hitPos * PI / 3;
-  let speed = min(sqrt(ballVX**2 + ballVY**2) * SPEED_INCREASE, MAX_SPEED);
+  let speed = min(sqrt(ballVX ** 2 + ballVY ** 2) * SPEED_INCREASE, MAX_SPEED);
 
   let direction = isLeftPlayer ? 1 : -1;
   ballVX = direction * speed * cos(angle);
@@ -203,11 +211,11 @@ function checkWin() {
   if (leftScore >= pointsToWin || rightScore >= pointsToWin) {
     noLoop();
 
- let thisGame = millis() - gameStartTime;
+    let thisGame = millis() - gameStartTime;
 
-if (thisGame > longestGame) {
-  longestGame = thisGame;
-}
+    if (thisGame > longestGame) {
+      longestGame = thisGame;
+    }
 
     setTimeout(() => {
       alert(leftScore > rightScore ? "Left player wins! 🎉" : "Right player wins! 🎉");
@@ -230,4 +238,4 @@ function windowResized() {
   resetBall();
 }
 
-document.ontouchmove = function(event) { event.preventDefault(); };
+document.ontouchmove = function (event) { event.preventDefault(); };
