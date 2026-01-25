@@ -21,13 +21,30 @@ const MAX_SPEED = 14;
 
 let playerSpeed = 8;
 
+const HIT_H = paddleH * 0.5*2;
+const HIT_W = paddleW * 1.8; // verkon leveys
+
+const HIT_OFFSET = -paddleH * 0.5; // sama kuin kuvan offset
+
+
 
 // Game timing
 let gameStartTime = 0;
 let longestGame = 0;
 
 let leftAngle = 0;
+let leftTargetAngle = 0;
+
+
+const HIT_ANGLE = Math.PI / 5;   // kuinka voimakas lyönti
+const ANGLE_LERP = 0.25;         // animaation nopeus (0.1–0.3 hyvä)
+
+
 let rightAngle = 0;
+let rightTargetAngle = 0;
+
+const ANGLE_ANIM_SPEED = 0.15; // nopeampi = lyöntimäisempi
+
 
 const ANGLE_SPEED = 0.04;
 const MAX_ANGLE = Math.PI / 8; // 45 / 2
@@ -35,6 +52,8 @@ const MAX_ANGLE = Math.PI / 8; // 45 / 2
 let useImages = true; // toggle this on/off
 let paddleImgLeft, paddleImgRight;
 
+let leftFlipped = false;
+let rightFlipped = false;
 
 
 function setup() {
@@ -51,8 +70,8 @@ function setup() {
 
 function preload() {
   if (useImages) {
-    paddleImgLeft = loadImage('leftPaddle.png');  // path to your left paddle PNG
-    paddleImgRight = loadImage('rightPaddle.png'); // path to your right paddle PNG
+    paddleImgLeft = loadImage('leftPaddle2.png');  // path to your left paddle PNG
+    paddleImgRight = loadImage('rightPaddle2.png'); // path to your right paddle PNG
   }
 }
 
@@ -103,6 +122,16 @@ function scorePoint(isLeftPlayerScored) {
 }
 
 
+
+
+function getHitY(isLeft) {
+  let baseY = isLeft ? leftY : rightY;
+  let flipped = isLeft ? leftFlipped : rightFlipped;
+  return baseY + (flipped ? -HIT_OFFSET+HIT_OFFSET : HIT_OFFSET+HIT_OFFSET);
+}
+
+
+
 function draw() {
   background("green");
 
@@ -116,27 +145,66 @@ function draw() {
   noStroke();
   fill("beige");
 
-push();
-translate(leftX, leftY);
-rotate(leftAngle);
-if (useImages && paddleImgLeft) {
-  imageMode(CENTER);
-  image(paddleImgLeft, 0, 0, paddleW, paddleH);
-} else {
-  rect(0, 0, paddleW, paddleH);
-}
-pop();
+  push();
+  translate(leftX, leftY);
+  rotate(leftAngle + (leftFlipped ? PI : 0));
 
-push();
-translate(rightX, rightY);
-rotate(rightAngle);
-if (useImages && paddleImgRight) {
-  imageMode(CENTER);
-  image(paddleImgRight, 0, 0, paddleW, paddleH);
-} else {
-  rect(0, 0, paddleW, paddleH);
-}
-pop();
+  if (useImages && paddleImgLeft) {
+    imageMode(CENTER);
+    image(
+      paddleImgLeft,
+      0,
+      leftFlipped ? -HIT_OFFSET : HIT_OFFSET,
+      paddleW * 2,
+      paddleH * 2
+    );
+  } else {
+    rect(0, 0, paddleW, paddleH);
+  }
+  pop();
+
+
+  push();
+  translate(rightX, rightY);
+  rotate(rightAngle + (rightFlipped ? PI : 0));
+
+  if (useImages && paddleImgRight) {
+    imageMode(CENTER);
+    image(
+      paddleImgRight,
+      0,
+      rightFlipped ? -HIT_OFFSET : HIT_OFFSET,
+      paddleW * 2,
+      paddleH * 2
+    );
+  } else {
+    rect(0, 0, paddleW, paddleH);
+  }
+  pop();
+
+
+
+
+// DEBUG: osuma-alueet
+noFill();
+stroke(255, 0, 0);
+
+rect(
+  leftX,
+  getHitY(true),
+  HIT_W,
+  HIT_H
+);
+
+rect(
+  rightX,
+  getHitY(false),
+  HIT_W,
+  HIT_H
+);
+
+noStroke();
+
 
 
 
@@ -150,6 +218,21 @@ pop();
   drawTime();
   checkWin();
 }
+
+
+function keyPressed() {
+  // LEFT PLAYER flip
+  if (key === 'G' || key === 'g') {
+    leftFlipped = !leftFlipped;
+  }
+
+  // RIGHT PLAYER flip
+  if (key === 'L' || key === 'l') {
+    rightFlipped = !rightFlipped;
+  }
+}
+
+
 
 // Piirtää pelin keston ja pisimmän pelin
 function drawTime() {
@@ -210,6 +293,51 @@ function handleInput() {
 
 
 
+  // LEFT PLAYER
+  if (keyIsDown(70)) { // O = perus
+    leftTargetAngle = MAX_ANGLE;
+  }
+
+  if (keyIsDown(82)) { // P = rysty
+    leftTargetAngle = -MAX_ANGLE;
+  }
+
+  // RIGHT PLAYER
+  if (keyIsDown(73)) { // I = perus
+    rightTargetAngle = -MAX_ANGLE;
+  }
+
+  if (keyIsDown(75)) { // K = rysty
+    rightTargetAngle = MAX_ANGLE;
+  }
+
+  if (
+    !keyIsDown(70) &&
+    !keyIsDown(82)
+  ) {
+    leftTargetAngle = 0;
+  }
+
+  if (
+    !keyIsDown(73) &&
+    !keyIsDown(75)
+  ) {
+    rightTargetAngle = 0;
+  }
+
+
+
+  // Animoidaan kulma kohti tavoitetta
+  leftAngle = lerp(leftAngle, leftTargetAngle, ANGLE_LERP);
+
+  // Kun lyönti on melkein valmis → palauta maila keskelle
+  if (abs(leftAngle - leftTargetAngle) < 0.01) {
+    leftTargetAngle = 0;
+  }
+
+
+
+
   leftAngle = constrain(leftAngle, -MAX_ANGLE, MAX_ANGLE);
   rightAngle = constrain(rightAngle, -MAX_ANGLE, MAX_ANGLE);
 
@@ -238,6 +366,10 @@ function handleInput() {
 
 }
 
+
+
+
+
 function moveBall() {
   ballX += ballVX * speedMultiplier;
   ballY += ballVY * speedMultiplier;
@@ -252,21 +384,30 @@ function moveBall() {
     ballVY = -abs(ballVY);
   }
 
+
+  let hitY = getHitY(true);
+
   if (
     ballX - ballSize / 2 < leftX + paddleW / 2 &&
     ballX - ballSize / 2 > leftX - paddleW / 2 &&
-    ballY > leftY - paddleH / 2 && ballY < leftY + paddleH / 2
+    ballY > hitY - HIT_H / 2 &&
+    ballY < hitY + HIT_H / 2
   ) {
-    applySpin(leftY, true);
+    applySpin(hitY, true);
   }
 
-  if (
-    ballX + ballSize / 2 > rightX - paddleW / 2 &&
-    ballX + ballSize / 2 < rightX + paddleW / 2 &&
-    ballY > rightY - paddleH / 2 && ballY < rightY + paddleH / 2
-  ) {
-    applySpin(rightY, false);
-  }
+
+hitY = getHitY(false);
+
+if (
+  ballX + ballSize / 2 > rightX - HIT_W / 2 &&
+  ballX - ballSize / 2 < rightX + HIT_W / 2 &&
+  ballY + ballSize / 2 > hitY - HIT_H / 2 &&
+  ballY - ballSize / 2 < hitY + HIT_H / 2
+) {
+  applySpin(hitY, false);
+}
+
 
   if (ballX < 0) {
     scorePoint(false);
@@ -278,31 +419,54 @@ function moveBall() {
 
 }
 
-function applySpin(paddleY, isLeftPlayer) {
-  let paddleCenter = paddleY;
-  let hitPos = (ballY - paddleCenter) / (paddleH / 2);
+
+
+
+function applySpin(hitY, isLeftPlayer) {
+  let hitPos = (ballY - hitY) / (paddleH / 2);
   hitPos = constrain(hitPos, -1, 1);
 
-  // Base bounce angle from hit position
+  let angle = hitPos * PI / 3;
+  let speed = min(sqrt(ballVX ** 2 + ballVY ** 2) * SPEED_INCREASE, MAX_SPEED);
+
+  let direction = isLeftPlayer ? 1 : -1;
+  ballVX = direction * speed * cos(angle);
+  ballVY = speed * sin(angle);
+
+  speedMultiplier = min(speedMultiplier * SPEED_INCREASE, MAX_SPEED / 5);
+}
+
+
+function applySpinBAK(hitY, isLeftPlayer) {
+  let hitPos = (ballY - hitY) / (HIT_H / 2);
+  hitPos = constrain(hitPos, -1, 1);
+
   let baseAngle = hitPos * PI / 3;
 
-  // Paddle angle adds "fake physics" spin
-  let paddleAngle = isLeftPlayer ? leftAngle : rightAngle;
+  let paddleAngle = isLeftPlayer
+    ? leftAngle + (leftFlipped ? PI : 0)
+    : rightAngle + (rightFlipped ? PI : 0);
 
-  let finalAngle = baseAngle + paddleAngle * 0.8; // tuning factor
+  let finalAngle = baseAngle + paddleAngle * 0.8;
+
+  // 🔥 PEILAUS OIKEALLE PELAAJALLE
+  if (!isLeftPlayer) {
+    finalAngle = PI - finalAngle;
+  }
+
+
+  finalAngle = PI - finalAngle;
 
   let speed = min(
     sqrt(ballVX ** 2 + ballVY ** 2) * SPEED_INCREASE,
     MAX_SPEED
   );
 
-  let direction = isLeftPlayer ? 1 : -1;
-
-  ballVX = direction * speed * cos(finalAngle);
+  ballVX = speed * cos(finalAngle);
   ballVY = speed * sin(finalAngle);
-
-  speedMultiplier = min(speedMultiplier * SPEED_INCREASE, MAX_SPEED / 5);
 }
+
+
 
 function drawScore() {
   fill(255);
